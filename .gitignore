@@ -1,0 +1,43 @@
+# === 데이터 (용량 큼) ===
+data/LSWMD.pkl
+data/raw/
+data/processed/*.npz
+data/processed/*.parquet
+data/processed/*.pkl
+
+# === 모델 가중치 ===
+models/checkpoints/*.pt
+models/checkpoints/*.pth
+models/checkpoints/*.ckpt
+
+# === 실험 로그 ===
+results/logs/
+wandb/
+runs/
+lightning_logs/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# === 환경 ===
+.venv/
+venv/
+env/
+.env
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# 단, README용 결과 그림(docs/images)은 추적한다
+!docs/images/
+!docs/images/*.png

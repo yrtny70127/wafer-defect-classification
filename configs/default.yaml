@@ -1,0 +1,63 @@
+# ==========================================================================
+# 웨이퍼 맵 결함 분류 기본 설정
+# 실험별로 이 파일을 복사해서 오버라이드하세요 (예: configs/exp01.yaml)
+# ==========================================================================
+
+project:
+  name: wafer-defect-classifier
+  seed: 42
+  device: cuda          # cuda | cpu | mps
+
+# --- 데이터 ---
+data:
+  raw_pkl: data/LSWMD.pkl
+  processed_dir: data/processed
+  image_size: 128          # 리사이즈 후 정사각 크기
+  classes: [Center, Donut, Edge-Loc, Edge-Ring, Loc, Near-full, Random, Scratch, none]
+  use_none_class: true     # 'none' (결함없음)을 9번째 클래스로 쓸지
+  val_ratio: 0.15
+  test_ratio: 0.15
+  num_workers: 4
+  batch_size: 64
+
+# --- 증강 ---
+augment:
+  rotation: [0, 90, 180, 270]   # 웨이퍼 맵은 회전 불변
+  hflip: true
+  vflip: true
+
+# --- 모델 ---
+model:
+  name: resnet18           # resnet18 | resnet50 | efficientnet_b0
+  pretrained: true
+  num_classes: 9           # 8 defect + none
+  # multi-label 모드 (Phase 2) 사용 시 true
+  multi_label: false
+  # 공정 원인 카테고리 헤드 추가 (Phase 2)
+  cause_head:
+    enabled: false
+    num_causes: 7          # defect_to_cause.yaml 참조
+
+# --- 학습 ---
+train:
+  epochs: 30
+  optimizer: adamw
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  scheduler: cosine
+  warmup_epochs: 2
+  class_weighting: true    # 클래스 불균형 대응
+  early_stopping_patience: 5
+
+# --- 로깅 ---
+logging:
+  backend: wandb           # wandb | tensorboard | none
+  project: wafer-defect
+  log_dir: results/logs
+  checkpoint_dir: models/checkpoints
+  save_top_k: 3
+
+# --- Grad-CAM ---
+gradcam:
+  target_layer: layer4     # resnet 기준 마지막 conv 블록
+  output_dir: results/figures/gradcam

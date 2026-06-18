@@ -1,0 +1,56 @@
+# ==========================================================================
+# 8-class 결함 패턴 → 공정 원인 카테고리 매핑
+# 출처: 프로젝트 제안서 2.1절 표
+# 한 패턴이 여러 원인에 연결될 수 있어 다중 매핑 가능
+# ==========================================================================
+
+causes:
+  - lithography_cmp        # 노광/CMP 문제
+  - pr_uniformity          # PR 균일도
+  - particle_edge          # 파티클/에지 문제
+  - particle_handling      # 파티클/핸들링
+  - handling               # 핸들링 (스크래치)
+  - equipment              # 장비 이상
+  - environment            # 환경 파티클
+  - mixed                  # 복합 원인
+
+# 각 결함 패턴이 시사하는 주요 공정 원인
+pattern_to_cause:
+  Center:
+    primary: lithography_cmp
+    detail: "CMP 연마 불균일, 플라즈마 밀도 중심 집중, 노광 포커스 오차"
+  Donut:
+    primary: pr_uniformity
+    detail: "PR 균일도 불량 (스핀코팅 불균일), 연마 패드 경화"
+  Edge-Ring:
+    primary: particle_edge
+    detail: "베벨 파티클 오염, CMP 슬러리 잔류, EBR 처리 불균일"
+  Edge-Loc:
+    primary: particle_handling
+    detail: "장비 접촉 불량, 웨이퍼 핸들링 파티클"
+  Scratch:
+    primary: handling
+    detail: "로봇 핸들링 스크래치, 카세트 슬롯 마모, 연마 패드 응집"
+  Loc:
+    primary: equipment
+    detail: "장비 특정 부위 이상, 척/핀 손상, 가스 인렛 불균일"
+  Random:
+    primary: environment
+    detail: "클린룸 환경 파티클, 화학물질 잔류"
+  Near-full:
+    primary: mixed
+    detail: "복합 공정 이상 누적"
+  none:
+    primary: null
+    detail: "정상 웨이퍼"
+
+# 각 원인별 조치 가이드 (Grad-CAM 리포트에 표시)
+action_guide:
+  lithography_cmp: "노광 포커스/도즈 점검, CMP 패드 컨디셔닝 상태 확인"
+  pr_uniformity:   "스핀 코팅 RPM/가속 점검, PR 점도 및 온도 확인"
+  particle_edge:   "베벨 클리너 점검, CMP 슬러리 공급부 점검, EBR 노즐 상태"
+  particle_handling: "웨이퍼 핸들링 로봇 청소, 장비 접촉부 파티클 검사"
+  handling:        "로봇 암 마모 점검, 카세트 슬롯 교체 검토"
+  equipment:       "해당 챔버 내부 점검, 척/핀/가스 인렛 상태 확인"
+  environment:     "클린룸 FFU 점검, 사용 화학물질 필터 교체"
+  mixed:           "공정 전반 점검 필요 - 생산 중단 후 정밀 분석"
