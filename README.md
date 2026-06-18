@@ -11,11 +11,12 @@
 | 모델 | 태스크 | macro-F1 | accuracy |
 |---|---|---|---|
 | 기준 (ResNet18 전이학습) | 결함 분류 | 0.811 | 0.943 |
-| 개선 (Focal Loss + 균형 가중치) | 결함 분류 | **0.899** | 0.981 |
+| 개선 (Focal Loss + 균형 가중치) | 결함 분류 | 0.899 | 0.981 |
+| **최종 (50ep 장기학습 + TTA)** | 결함 분류 | **0.914** | **0.982** |
 | 멀티태스크 | 결함 분류 | 0.890 | 0.979 |
 | 멀티태스크 | 공정 원인 추론 | **0.896** | 0.980 |
 
-정상(none) 클래스가 전체의 85%인 심한 불균형 환경에서, 단순 정확도가 아닌 **macro-F1**과 **클래스별 precision/recall**을 핵심 지표로 사용했다. 불균형 대응 기법으로 가장 약했던 Scratch 클래스의 precision이 0.42 → 0.86으로 개선되었다.
+정상(none) 클래스가 전체의 85%인 심한 불균형 환경에서, 단순 정확도가 아닌 **macro-F1**과 **클래스별 precision/recall**을 핵심 지표로 사용했다. 불균형 대응 기법으로 가장 약했던 Scratch 클래스의 precision이 0.42 → 0.86으로 개선되었고, 장기 학습과 TTA를 더해 최종 결함 분류 macro-F1 **0.914**를 달성했다.
 
 ---
 
@@ -35,6 +36,7 @@
 - **불균형 대응**: 1차에서 inverse-frequency 가중치를 사용했으나 오탐이 많았다. 2차에서 **Focal Loss(γ=2) + class-balanced 가중치(effective number)** 로 오탐을 크게 줄였다.
 - **설명가능성**: **Grad-CAM**으로 모델이 실제 결함 영역을 보고 판단하는지 검증.
 - **공정 원인 추론**: 백본을 공유하는 **멀티태스크 구조**(결함 헤드 + 원인 헤드). 원인 라벨은 결함→원인 도메인 매핑(`configs/mappings/defect_to_cause.yaml`)에서 생성.
+- **성능 향상**: 50에폭 장기 학습(조기종료) + **TTA**(회전·반전 8가지 예측 평균)로 결함 분류 macro-F1을 0.899 → 0.914로 개선.
 
 ---
 
@@ -51,6 +53,10 @@
 ### Grad-CAM — 모델이 주목한 영역
 
 ![Grad-CAM](docs/images/gradcam.png)
+
+### 최종 모델 혼동행렬 (50ep + TTA, macro-F1 0.914)
+
+![최종 혼동행렬](docs/images/final_confusion.png)
 
 ---
 
@@ -71,7 +77,8 @@ project/
 │   ├── 04_gradcam_eval.ipynb       Grad-CAM 분석 및 추론 데모
 │   ├── 05_imbalance_focal.ipynb    개선 모델 (Focal Loss + 균형 가중치)
 │   ├── 06_results_summary.ipynb    데이터~결과 전 과정 종합
-│   └── 07_multitask_cause.ipynb    멀티태스크 (결함 + 공정 원인)
+│   ├── 07_multitask_cause.ipynb    멀티태스크 (결함 + 공정 원인)
+│   └── 08_longtrain_tta.ipynb      장기학습 + TTA (최종 모델)
 ├── app/
 │   └── streamlit_app.py            진단 데모 웹앱
 ├── utils/
@@ -106,8 +113,10 @@ notebooks/01_eda.ipynb  →  notebooks/02_preprocessing.ipynb
 
 ```
 03_baseline_model.ipynb  →  04_gradcam_eval.ipynb  →  05_imbalance_focal.ipynb
-06_results_summary.ipynb  →  07_multitask_cause.ipynb
+06_results_summary.ipynb  →  07_multitask_cause.ipynb  →  08_longtrain_tta.ipynb
 ```
+
+> `08_longtrain_tta.ipynb`가 최종 결함 분류 모델(50에폭 + TTA, macro-F1 0.914)이다.
 
 ### 4. 진단 데모 실행
 
@@ -121,14 +130,4 @@ streamlit run app/streamlit_app.py
 
 ## 한계 및 향후 계획
 
-- 데이터는 공개 벤치마크(WM-811K)이며, 모델은 ImageNet 사전학습 가중치를 활용한 전이학습이다.
-- 공정 원인은 결함 패턴과 1:1로 대응하는 도메인 매핑에 기반하므로, 원인 헤드는 결함 헤드와 유사하게 동작한다. 혼합 결함(1:다)은 아직 다루지 않는다.
-- 향후: 혼합 결함 데이터셋(MixedWM38) 추가 및 원인 다중 라벨화, EfficientNet 등 백본 실험, 진단 리포트 자동 생성.
-
-자세한 내용은 [docs/REPORT.md](docs/REPORT.md) 참고.
-
----
-
-## 기술 스택
-
-Python · PyTorch · torchvision · scikit-learn · OpenCV · matplotlib · Streamlit
+-
