@@ -8,7 +8,7 @@
     - 결함 패턴 분류 + 공정 원인 추론 + 신뢰도
     - 원인별 조치 가이드 + Grad-CAM 근거 시각화
 전제:
-    - models/checkpoints/q5_multitask_resnet18.pt (Q5 노트북 실행으로 생성)
+    - models/checkpoints/q8_multitask_50ep.pt (09_multitask_longtrain 노트북 실행으로 생성)
     - data/processed/wafer_test.npz (샘플 선택용)
 """
 from pathlib import Path
@@ -24,7 +24,7 @@ from torchvision import models
 
 # ---- 경로 (프로젝트 루트 기준 실행 가정) ----
 ROOT = Path(__file__).resolve().parent.parent
-CKPT = ROOT / "models" / "checkpoints" / "q5_multitask_resnet18.pt"
+CKPT = ROOT / "models" / "checkpoints" / "q8_multitask_50ep.pt"
 TEST = ROOT / "data" / "processed" / "wafer_test.npz"
 MAP_YAML = ROOT / "configs" / "mappings" / "defect_to_cause.yaml"
 
@@ -108,7 +108,7 @@ def main():
 
     if not CKPT.exists():
         st.error(f"모델 체크포인트가 없습니다: {CKPT}\n"
-                 "먼저 notebooks/quick/Q5_multitask_cause.ipynb 를 실행해 모델을 학습/저장하세요.")
+                 "먼저 notebooks/09_multitask_longtrain.ipynb 를 실행해 모델을 학습/저장하세요.")
         st.stop()
 
     net, mp, cause_names = load_assets()
